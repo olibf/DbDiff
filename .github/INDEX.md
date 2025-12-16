@@ -73,8 +73,8 @@ git push origin v1.0.0
 Add these to your README.md:
 
 ```markdown
-[![CI](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml)
-[![Release](https://github.com/USERNAME/dbdiff/actions/workflows/release.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/release.yml)
+[![CI](https://github.com/olibf/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/olibf/dbdiff/actions/workflows/ci.yml)
+[![Release](https://github.com/olibf/dbdiff/actions/workflows/release.yml/badge.svg)](https://github.com/olibf/dbdiff/actions/workflows/release.yml)
 ```
 
 ## Permissions

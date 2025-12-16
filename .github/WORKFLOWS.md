@@ -28,7 +28,7 @@ DbDiff uses GitHub Actions for continuous integration, testing, and automated re
 
 **Status Badge:**
 ```markdown
-[![CI](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml)
+[![CI](https://github.com/olibf/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/olibf/dbdiff/actions/workflows/ci.yml)
 ```
 
 ### 2. PR Check Workflow (`.github/workflows/pr-check.yml`)

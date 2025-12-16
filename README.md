@@ -3,8 +3,8 @@
 A CLI tool for exporting and comparing database schemas, built with .NET following hexagonal architecture principles.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml)
-[![Release](https://github.com/USERNAME/dbdiff/actions/workflows/release.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/release.yml)
+[![CI](https://github.com/olibf/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/olibf/dbdiff/actions/workflows/ci.yml)
+[![Release](https://github.com/olibf/dbdiff/actions/workflows/release.yml/badge.svg)](https://github.com/olibf/dbdiff/actions/workflows/release.yml)
 
 ## Version
 
