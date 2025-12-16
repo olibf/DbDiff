@@ -312,9 +312,6 @@ public class PathValidatorTests
         var rootPath = "/test.txt";
 
         // Act
-        // Root directory writes should still be validated
-        var result = PathValidator.ValidateOutputPath(rootPath);
-        
         // Assert - just verify it returns a path (actual write permission depends on user)
         Assert.Throws<UnauthorizedAccessException>(() => PathValidator.ValidateOutputPath(rootPath));
     }
