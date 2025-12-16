@@ -8,7 +8,7 @@ A CLI tool for exporting and comparing database schemas, built with .NET followi
 
 ## Version
 
-Current version: **0.0.1** (unreleased)
+Current version: **0.0.1**
 
 ## Features
 
@@ -180,10 +180,10 @@ The project follows **Hexagonal Architecture** (Ports & Adapters) with clear sep
 │ DbDiff.Application   │ ──► Use cases, DTOs, Formatters
 └──────┬───────────────┘
        │
-┌──────▼────────────┐       ┌──────────────────────┐
+┌──────▼────────────┐        ┌──────────────────────┐
 │  DbDiff.Domain    │ ◄───── │ DbDiff.Infrastructure│
-│  (Port Interfaces)│       │  (Adapters: MSSQL)   │
-└───────────────────┘       └──────────────────────┘
+│  (Port Interfaces)│        │  (Adapters: MSSQL)   │
+└───────────────────┘        └──────────────────────┘
 ```
 
 ### Project Structure
@@ -320,8 +320,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - ✅ Distribution allowed
 - ✅ Private use allowed
 - ❗ License and copyright notice must be included
-
-## Credits
-
-Built with ❤️ using .NET and hexagonal architecture principles.
 
