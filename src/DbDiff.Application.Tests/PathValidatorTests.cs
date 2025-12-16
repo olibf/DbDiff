@@ -112,7 +112,9 @@ public class PathValidatorTests
     public void ValidateOutputPath_WithInvalidCharacters_ThrowsArgumentException()
     {
         // Arrange
-        var invalidPath = "output/file<>*.txt"; // Contains invalid filename characters
+        var invalidPath = OperatingSystem.IsWindows() 
+            ? "output/file<>*.txt"  // <, >, * are invalid on Windows
+            : "output/file\0.txt";   // null character is invalid on Unix
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => PathValidator.ValidateOutputPath(invalidPath));
@@ -266,7 +268,17 @@ public class PathValidatorTests
         Assert.NotNull(result);
         Assert.True(Path.IsPathRooted(result));
         // Path should be normalized to use consistent separators
-        Assert.DoesNotContain("/", result.Replace("://", ""));  // Ignore protocol separators
+        // Path should use the OS-appropriate separator
+        if (OperatingSystem.IsWindows())
+        {
+            // On Windows, should use backslashes
+            Assert.DoesNotContain("/", result.Replace("://", ""));  // Ignore protocol separators
+        }
+        else
+        {
+            // On Unix/Linux, forward slashes are correct
+            Assert.Contains("/", result);
+        }
     }
 
     [Fact]
@@ -304,7 +316,7 @@ public class PathValidatorTests
         var result = PathValidator.ValidateOutputPath(rootPath);
         
         // Assert - just verify it returns a path (actual write permission depends on user)
-        Assert.NotNull(result);
+        Assert.Throws<UnauthorizedAccessException>(() => PathValidator.ValidateOutputPath(rootPath));
     }
 }
 
