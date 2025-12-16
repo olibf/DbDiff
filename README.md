@@ -6,7 +6,7 @@ A CLI tool for exporting and comparing database schemas, built with .NET followi
 
 ## Version
 
-Current version: **0.1.0**
+Current version: **0.0.1** (unreleased)
 
 ## Features
 
@@ -15,6 +15,11 @@ Current version: **0.1.0**
 - Alphabetically sorted tables and columns for easy comparison
 - Configurable via CLI arguments, environment variables, or configuration files
 - Structured logging with Serilog
+- **Comprehensive security features:**
+  - Path validation and sanitization to prevent path traversal attacks
+  - Protection against writing to system directories
+  - SQL injection prevention via parameterized queries
+  - Input validation throughout
 
 ## Installation
 
@@ -235,6 +240,20 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and planned features.
 - Support for additional database objects (indexes, foreign keys, views, etc.)
 - GUI application using AvaloniaUI
 - Multiple output formats (JSON, YAML, SQL DDL)
+
+## Security
+
+DbDiff takes security seriously. We've implemented comprehensive security measures including:
+
+- **Path validation**: All file paths are validated and sanitized to prevent path traversal attacks
+- **SQL injection prevention**: All database queries use parameterized statements
+- **Input validation**: Comprehensive validation of all user inputs
+
+For detailed security information, please see [SECURITY.md](SECURITY.md).
+
+### Reporting Security Vulnerabilities
+
+If you discover a security vulnerability, please report it responsibly by contacting the maintainers directly rather than creating a public issue.
 
 ## Contributing
 

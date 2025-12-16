@@ -1,6 +1,7 @@
 ﻿using DbDiff.Application.DTOs;
 using DbDiff.Application.Formatters;
 using DbDiff.Application.Services;
+using DbDiff.Application.Validation;
 using DbDiff.Domain;
 using DbDiff.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -16,8 +17,18 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables(prefix: "DBDIFF_")
     .Build();
 
-// Setup Serilog
+// Setup Serilog with path validation
 var logPath = configuration["Serilog:LogPath"] ?? "logs/dbdiff-.txt";
+try
+{
+    logPath = PathValidator.ValidateLogPath(logPath);
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Error: Invalid log path '{logPath}': {ex.Message}");
+    return 1;
+}
+
 var serilogLogger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.File(
@@ -80,7 +91,7 @@ for (int i = 0; i < args.Length; i++)
 
 if (showHelp || args.Length == 0)
 {
-    Console.WriteLine("DbDiff - Database Schema Comparison Tool v0.1.0");
+    Console.WriteLine("DbDiff - Database Schema Comparison Tool v0.0.1");
     Console.WriteLine();
     Console.WriteLine("Usage:");
     Console.WriteLine("  dbdiff --connection <connection-string> [options]");
@@ -105,14 +116,27 @@ if (showHelp || args.Length == 0)
 
 try
 {
-    // Load custom config if specified
+    // Load custom config if specified (with path validation)
     if (!string.IsNullOrWhiteSpace(configFile))
     {
-        configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(configFile, optional: false, reloadOnChange: false)
-            .AddEnvironmentVariables(prefix: "DBDIFF_")
-            .Build();
+        try
+        {
+            // Validate config file path - restrict to current directory and subdirectories for security
+            var validatedConfigPath = PathValidator.ValidateConfigPath(
+                configFile, 
+                allowedBasePath: Directory.GetCurrentDirectory());
+            
+            configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(validatedConfigPath, optional: false, reloadOnChange: false)
+                .AddEnvironmentVariables(prefix: "DBDIFF_")
+                .Build();
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or UnauthorizedAccessException)
+        {
+            Console.Error.WriteLine($"Error: Invalid configuration file: {ex.Message}");
+            return 1;
+        }
     }
 
     // Priority: CLI args > Environment variables > Config file
@@ -137,7 +161,7 @@ try
         return 1;
     }
 
-    Console.WriteLine("DbDiff - Database Schema Export v0.1.0");
+    Console.WriteLine("DbDiff - Database Schema Export v0.0.1");
     Console.WriteLine($"Output: {outputPath}");
     Console.WriteLine();
 
@@ -149,7 +173,19 @@ try
     }
 
     var exportService = serviceProvider.GetRequiredService<SchemaExportService>();
-    var request = new SchemaExportRequest(connectionString, outputPath);
+    
+    // Note: Path validation happens in SchemaExportRequest constructor
+    SchemaExportRequest request;
+    try
+    {
+        request = new SchemaExportRequest(connectionString, outputPath);
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        Console.Error.WriteLine($"✗ Security Error: {ex.Message}");
+        Log.Error(ex, "Unauthorized path access attempt");
+        return 1;
+    }
 
     var result = await exportService.ExportSchemaAsync(request);
 
