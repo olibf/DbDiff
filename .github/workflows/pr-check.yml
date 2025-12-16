@@ -1,0 +1,61 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  multi-platform-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+    
+    - name: Verify publish (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        dotnet publish src/DbDiff.Cli/DbDiff.Cli.csproj \
+          -c Release \
+          -r linux-x64 \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -o ./verify-publish
+    
+    - name: Verify publish (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        dotnet publish src/DbDiff.Cli/DbDiff.Cli.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          -o ./verify-publish
+    
+    - name: Verify publish (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        dotnet publish src/DbDiff.Cli/DbDiff.Cli.csproj \
+          -c Release \
+          -r osx-x64 \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -o ./verify-publish
+

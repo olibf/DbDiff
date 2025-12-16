@@ -3,6 +3,8 @@
 A CLI tool for exporting and comparing database schemas, built with .NET following hexagonal architecture principles.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/ci.yml)
+[![Release](https://github.com/USERNAME/dbdiff/actions/workflows/release.yml/badge.svg)](https://github.com/USERNAME/dbdiff/actions/workflows/release.yml)
 
 ## Version
 
@@ -214,6 +216,52 @@ The project follows **Hexagonal Architecture** (Ports & Adapters) with clear sep
 ```bash
 dotnet test
 ```
+
+### CI/CD with GitHub Actions
+
+This project includes automated workflows for continuous integration and releases:
+
+#### Continuous Integration (CI)
+
+The CI workflow runs automatically on every push or pull request to `main` or `develop` branches:
+- Restores dependencies
+- Builds the project in Release mode
+- Runs all tests
+- Uploads build artifacts
+
+#### Pull Request Checks
+
+Pull requests trigger multi-platform testing on:
+- Ubuntu (Linux)
+- Windows
+- macOS
+
+This ensures compatibility across all supported platforms.
+
+#### Automated Releases
+
+To create a release:
+
+1. Update the version in `CHANGELOG.md` following semantic versioning
+2. Commit your changes
+3. Create and push a version tag:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The release workflow automatically:
+- Builds self-contained executables for:
+  - Windows x64
+  - Linux x64
+  - macOS x64 (Intel)
+  - macOS ARM64 (Apple Silicon)
+- Creates release archives (ZIP for Windows, tar.gz for Linux/macOS)
+- Creates a GitHub release with all binaries attached
+- Links to the CHANGELOG for release notes
+
+**Note:** GitHub Actions requires appropriate permissions. Ensure your repository settings allow Actions to create releases.
 
 ## Logging
 
