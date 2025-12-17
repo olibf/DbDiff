@@ -5,7 +5,7 @@ namespace DbDiff.Infrastructure;
 public class MsSqlSchemaExtractor : ISchemaExtractor
 {
     public async Task<DatabaseSchema> ExtractSchemaAsync(
-        string connectionString, 
+        string connectionString,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
@@ -22,8 +22,8 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
         return new DatabaseSchema(databaseName, extractedAt, tables);
     }
 
-    private async Task<List<Table>> ExtractTablesAsync(
-        SqlConnection connection, 
+    private static async Task<List<Table>> ExtractTablesAsync(
+        SqlConnection connection,
         CancellationToken cancellationToken)
     {
         var tables = new List<Table>();
@@ -60,7 +60,7 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
         return tables;
     }
 
-    private async Task<List<Column>> ExtractColumnsAsync(
+    private static async Task<List<Column>> ExtractColumnsAsync(
         SqlConnection connection,
         string schemaName,
         string tableName,
@@ -116,4 +116,3 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
         return columns;
     }
 }
-

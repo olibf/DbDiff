@@ -10,7 +10,7 @@ public class Table
     {
         if (string.IsNullOrWhiteSpace(schemaName))
             throw new ArgumentException("Schema name cannot be null or empty.", nameof(schemaName));
-        
+
         if (string.IsNullOrWhiteSpace(tableName))
             throw new ArgumentException("Table name cannot be null or empty.", nameof(tableName));
 

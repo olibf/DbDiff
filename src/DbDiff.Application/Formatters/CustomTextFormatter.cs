@@ -8,8 +8,7 @@ public class CustomTextFormatter : ISchemaFormatter
 
     public string Format(DatabaseSchema schema)
     {
-        if (schema == null)
-            throw new ArgumentNullException(nameof(schema));
+        ArgumentNullException.ThrowIfNull(schema);
 
         var sb = new StringBuilder();
 
@@ -36,10 +35,10 @@ public class CustomTextFormatter : ISchemaFormatter
             foreach (var column in sortedColumns)
             {
                 sb.AppendLine($"  COLUMN: {column.Name}");
-                
+
                 if (IncludeOrdinalPosition)
                     sb.AppendLine($"    OrdinalPosition: {column.OrdinalPosition}");
-                
+
                 sb.AppendLine($"    Type: {column.DataType}");
                 sb.AppendLine($"    Nullable: {(column.IsNullable ? "Yes" : "No")}");
 
