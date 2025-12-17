@@ -1,5 +1,6 @@
 using DbDiff.Application.DTOs;
 using DbDiff.Application.Formatters;
+
 using Microsoft.Extensions.Logging;
 
 namespace DbDiff.Application.Services;
@@ -11,7 +12,7 @@ public class SchemaExportService
     private readonly ILogger<SchemaExportService> _logger;
 
     public SchemaExportService(
-        ISchemaExtractor schemaExtractor, 
+        ISchemaExtractor schemaExtractor,
         ISchemaFormatter schemaFormatter,
         ILogger<SchemaExportService> logger)
     {
@@ -21,11 +22,10 @@ public class SchemaExportService
     }
 
     public async Task<SchemaExportResult> ExportSchemaAsync(
-        SchemaExportRequest request, 
+        SchemaExportRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (request == null)
-            throw new ArgumentNullException(nameof(request));
+        ArgumentNullException.ThrowIfNull(request);
 
         try
         {
@@ -33,11 +33,11 @@ public class SchemaExportService
 
             // Extract schema from database
             var schema = await _schemaExtractor.ExtractSchemaAsync(
-                request.ConnectionString, 
+                request.ConnectionString,
                 cancellationToken);
 
-            _logger.LogInformation("Successfully extracted schema from database {DatabaseName} with {TableCount} tables", 
-                schema.DatabaseName, 
+            _logger.LogInformation("Successfully extracted schema from database {DatabaseName} with {TableCount} tables",
+                schema.DatabaseName,
                 schema.Tables.Count);
 
             // Format schema to text

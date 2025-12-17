@@ -18,7 +18,7 @@ public class DataType
     {
         if (obj is DataType other)
             return TypeName.Equals(other.TypeName, StringComparison.OrdinalIgnoreCase);
-        
+
         return false;
     }
 

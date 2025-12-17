@@ -11,12 +11,12 @@ public class Column
     public int OrdinalPosition { get; init; }
 
     public Column(
-        string name, 
-        DataType dataType, 
-        bool isNullable, 
+        string name,
+        DataType dataType,
+        bool isNullable,
         int ordinalPosition,
-        int? maxLength = null, 
-        int? precision = null, 
+        int? maxLength = null,
+        int? precision = null,
         int? scale = null)
     {
         if (string.IsNullOrWhiteSpace(name))

@@ -1,14 +1,15 @@
-﻿using DbDiff.Application.DTOs;
+using DbDiff.Application.DTOs;
 using DbDiff.Application.Formatters;
 using DbDiff.Application.Services;
 using DbDiff.Application.Validation;
 using DbDiff.Domain;
 using DbDiff.Infrastructure;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Serilog;
-using Serilog.Extensions.Logging;
 
 // Build configuration
 var configuration = new ConfigurationBuilder()
@@ -123,9 +124,9 @@ try
         {
             // Validate config file path - restrict to current directory and subdirectories for security
             var validatedConfigPath = PathValidator.ValidateConfigPath(
-                configFile, 
+                configFile,
                 allowedBasePath: Directory.GetCurrentDirectory());
-            
+
             configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(validatedConfigPath, optional: false, reloadOnChange: false)
@@ -140,13 +141,13 @@ try
     }
 
     // Priority: CLI args > Environment variables > Config file
-    var connectionString = connection 
+    var connectionString = connection
         ?? Environment.GetEnvironmentVariable("DBDIFF_ConnectionStrings__Default")
         ?? configuration["ConnectionStrings:Default"];
 
-    var outputPath = output 
+    var outputPath = output
         ?? Environment.GetEnvironmentVariable("DBDIFF_Export__OutputPath")
-        ?? configuration["Export:OutputPath"] 
+        ?? configuration["Export:OutputPath"]
         ?? "schema.txt";
 
     if (string.IsNullOrWhiteSpace(connectionString))
@@ -173,7 +174,7 @@ try
     }
 
     var exportService = serviceProvider.GetRequiredService<SchemaExportService>();
-    
+
     // Note: Path validation happens in SchemaExportRequest constructor
     SchemaExportRequest request;
     try
