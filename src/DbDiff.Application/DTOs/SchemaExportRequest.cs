@@ -6,8 +6,9 @@ public class SchemaExportRequest
 {
     public string ConnectionString { get; init; }
     public string OutputPath { get; init; }
+    public DatabaseType DatabaseType { get; init; }
 
-    public SchemaExportRequest(string connectionString, string outputPath)
+    public SchemaExportRequest(string connectionString, string outputPath, DatabaseType databaseType)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
@@ -15,6 +16,7 @@ public class SchemaExportRequest
         // Validate and sanitize the output path to prevent path traversal attacks
         OutputPath = PathValidator.ValidateOutputPath(outputPath);
         ConnectionString = connectionString;
+        DatabaseType = databaseType;
     }
 }
 
