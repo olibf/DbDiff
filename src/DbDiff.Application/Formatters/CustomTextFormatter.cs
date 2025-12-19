@@ -7,10 +7,11 @@ public class CustomTextFormatter : ISchemaFormatter
     public bool IncludeOrdinalPosition { get; set; } = true;
     public bool IncludeViewDefinitions { get; set; } = true;
 
+    private static readonly string[] separator = new[] { "\r\n", "\r", "\n" };
+
     public string Format(DatabaseSchema schema)
     {
-        if (schema == null)
-            throw new ArgumentNullException(nameof(schema));
+        ArgumentNullException.ThrowIfNull(schema);
 
         var sb = new StringBuilder();
 
@@ -47,7 +48,7 @@ public class CustomTextFormatter : ISchemaFormatter
             {
                 sb.AppendLine("  DEFINITION:");
                 // Indent each line of the definition
-                var definitionLines = view.Definition.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                var definitionLines = view.Definition.Split(separator, StringSplitOptions.None);
                 foreach (var line in definitionLines)
                 {
                     sb.AppendLine($"    {line}");

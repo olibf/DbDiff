@@ -1,14 +1,22 @@
-﻿using DbDiff.Application.DTOs;
+using System.Reflection;
+
+using DbDiff.Application.DTOs;
 using DbDiff.Application.Formatters;
 using DbDiff.Application.Services;
 using DbDiff.Application.Validation;
 using DbDiff.Domain;
 using DbDiff.Infrastructure;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Serilog;
-using Serilog.Extensions.Logging;
+
+// Get version from assembly
+var version = Assembly.GetExecutingAssembly()
+    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+    ?.InformationalVersion ?? "Unknown";
 
 // Build configuration
 var configuration = new ConfigurationBuilder()
@@ -51,8 +59,15 @@ services.AddLogging(builder =>
 });
 
 // Register application services
-services.AddSingleton<ISchemaExtractor, MsSqlSchemaExtractor>();
 services.AddSingleton<ISchemaFormatter, CustomTextFormatter>();
+
+// Register factory function for schema extractors
+services.AddSingleton<Func<DatabaseType, ISchemaExtractor>>(serviceProvider =>
+{
+    var factory = new SchemaExtractorFactory();
+    return (databaseType) => SchemaExtractorFactory.CreateExtractor(databaseType);
+});
+
 services.AddSingleton<SchemaExportService>();
 
 var serviceProvider = services.BuildServiceProvider();
@@ -61,6 +76,7 @@ var serviceProvider = services.BuildServiceProvider();
 string? connection = null;
 string? output = null;
 string? configFile = null;
+string? databaseTypeArg = null;
 bool showHelp = false;
 bool ignorePosition = false;
 bool excludeViewDefinitions = false;
@@ -81,6 +97,10 @@ for (int i = 0; i < args.Length; i++)
             if (i + 1 < args.Length)
                 configFile = args[++i];
             break;
+        case "--database-type" or "-d":
+            if (i + 1 < args.Length)
+                databaseTypeArg = args[++i];
+            break;
         case "--ignore-position":
             ignorePosition = true;
             break;
@@ -95,7 +115,7 @@ for (int i = 0; i < args.Length; i++)
 
 if (showHelp || args.Length == 0)
 {
-    Console.WriteLine("DbDiff - Database Schema Comparison Tool v0.0.1");
+    Console.WriteLine($"DbDiff - Database Schema Comparison Tool v{version}");
     Console.WriteLine();
     Console.WriteLine("Usage:");
     Console.WriteLine("  dbdiff --connection <connection-string> [options]");
@@ -103,6 +123,7 @@ if (showHelp || args.Length == 0)
     Console.WriteLine("Options:");
     Console.WriteLine("  -c, --connection <string>    Database connection string (required)");
     Console.WriteLine("  -o, --output <path>          Output file path (default: schema.txt)");
+    Console.WriteLine("  -d, --database-type <type>   Database type: sqlserver, postgresql (auto-detected if not specified)");
     Console.WriteLine("  --config <path>              Configuration file path");
     Console.WriteLine("  --ignore-position            Exclude column ordinal positions from output");
     Console.WriteLine("  --exclude-view-definitions   Exclude view SQL definitions from output");
@@ -114,8 +135,14 @@ if (showHelp || args.Length == 0)
     Console.WriteLine("  - appsettings.json file");
     Console.WriteLine();
     Console.WriteLine("Examples:");
+    Console.WriteLine("  # SQL Server");
     Console.WriteLine("  dbdiff --connection \"Server=localhost;Database=MyDb;Trusted_Connection=true;\" --output schema.txt");
-    Console.WriteLine("  dbdiff --connection \"Server=localhost;Database=MyDb;Trusted_Connection=true;\" --ignore-position");
+    Console.WriteLine();
+    Console.WriteLine("  # PostgreSQL");
+    Console.WriteLine("  dbdiff --connection \"Host=localhost;Database=mydb;Username=user;Password=pass\" --database-type postgresql");
+    Console.WriteLine();
+    Console.WriteLine("  # Auto-detect database type and ignore column positions");
+    Console.WriteLine("  dbdiff --connection \"Host=localhost;Database=mydb;Username=user;Password=pass\" --ignore-position");
     return 0;
 }
 
@@ -166,7 +193,27 @@ try
         return 1;
     }
 
-    Console.WriteLine("DbDiff - Database Schema Export v0.0.1");
+    // Determine database type
+    DatabaseType databaseType;
+    if (!string.IsNullOrWhiteSpace(databaseTypeArg))
+    {
+        // Explicit database type specified
+        if (!Enum.TryParse<DatabaseType>(databaseTypeArg, ignoreCase: true, out databaseType))
+        {
+            Console.Error.WriteLine($"Error: Invalid database type '{databaseTypeArg}'.");
+            Console.Error.WriteLine("Valid values: sqlserver, postgresql");
+            return 1;
+        }
+    }
+    else
+    {
+        // Auto-detect database type from connection string
+        databaseType = DetectDatabaseType(connectionString);
+        Console.WriteLine($"Auto-detected database type: {databaseType}");
+    }
+
+    Console.WriteLine($"DbDiff - Database Schema Export v{version}");
+    Console.WriteLine($"Database Type: {databaseType}");
     Console.WriteLine($"Output: {outputPath}");
     Console.WriteLine();
 
@@ -184,7 +231,7 @@ try
     SchemaExportRequest request;
     try
     {
-        request = new SchemaExportRequest(connectionString, outputPath);
+        request = new SchemaExportRequest(connectionString, outputPath, databaseType);
     }
     catch (UnauthorizedAccessException ex)
     {
@@ -216,4 +263,27 @@ catch (Exception ex)
 finally
 {
     await Log.CloseAndFlushAsync();
+}
+
+static DatabaseType DetectDatabaseType(string connectionString)
+{
+    // Check for PostgreSQL keywords
+    if (connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains("Username=", StringComparison.OrdinalIgnoreCase))
+    {
+        return DatabaseType.PostgreSql;
+    }
+
+    // Check for SQL Server keywords
+    if (connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains("Initial Catalog=", StringComparison.OrdinalIgnoreCase) ||
+        connectionString.Contains("Integrated Security=", StringComparison.OrdinalIgnoreCase))
+    {
+        return DatabaseType.SqlServer;
+    }
+
+    // Default to SQL Server for backward compatibility
+    Console.WriteLine("Warning: Could not auto-detect database type. Defaulting to SQL Server.");
+    return DatabaseType.SqlServer;
 }

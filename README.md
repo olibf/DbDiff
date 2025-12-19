@@ -12,12 +12,14 @@ Current version: **0.0.1**
 
 ## Features
 
-- Export MSSQL database schemas to text format
+- Export database schemas to text format from SQL Server and PostgreSQL
 - **Complete schema export including:**
   - Tables with full column definitions
   - Views with SQL definitions and column structures
 - Deterministic, diff-friendly output format
-- Alphabetically sorted tables, views, and columns for easy comparison
+- Alphabetically sorted tables and columns for easy comparison
+- Cross-database schema comparison (compare SQL Server vs PostgreSQL schemas)
+- Automatic database type detection from connection strings
 - Configurable via CLI arguments, environment variables, or configuration files
 - Structured logging with Serilog
 - **Comprehensive security features:**
@@ -96,18 +98,33 @@ cd src/DbDiff.Cli/bin/Release/net10.0/publish
 
 ### Basic Usage
 
+**SQL Server:**
 ```bash
 dbdiff --connection "Server=localhost;Database=MyDb;Trusted_Connection=true;" --output schema.txt
+```
+
+**PostgreSQL:**
+```bash
+dbdiff --connection "Host=localhost;Database=mydb;Username=user;Password=pass" --output schema.txt
 ```
 
 ### Command-Line Options
 
 - `-c, --connection <string>`: Database connection string (required)
 - `-o, --output <path>`: Output file path (default: schema.txt)
+- `-d, --database-type <type>`: Database type: `sqlserver`, `postgresql` (auto-detected if not specified)
 - `--config <path>`: Path to configuration file (default: appsettings.json)
 - `--ignore-position`: Exclude column ordinal positions from output
 - `--exclude-view-definitions`: Exclude view SQL definitions from output (column structure still included)
 - `-h, --help`: Show help information
+
+### Database Type Detection
+
+DbDiff can automatically detect the database type from your connection string:
+- **SQL Server** keywords: `Server=`, `Data Source=`, `Initial Catalog=`, `Integrated Security=`
+- **PostgreSQL** keywords: `Host=`, `Username=`
+
+You can override auto-detection using the `--database-type` parameter.
 
 ### Configuration
 
@@ -219,18 +236,37 @@ The project follows **Hexagonal Architecture** (Ports & Adapters) with clear sep
 ## Supported Databases
 
 - ✅ Microsoft SQL Server (MSSQL)
-- 🔄 PostgreSQL (planned)
+- ✅ PostgreSQL
+
+### Cross-Database Schema Comparison
+
+DbDiff uses a consistent output format for all database types, making it possible to compare schemas across different database platforms:
+
+```bash
+# Export SQL Server schema
+dbdiff --connection "Server=localhost;Database=MyDb;Trusted_Connection=true;" --output sqlserver-schema.txt
+
+# Export PostgreSQL schema
+dbdiff --connection "Host=localhost;Database=mydb;Username=user;Password=pass" --output postgres-schema.txt
+
+# Compare using your favorite diff tool
+diff sqlserver-schema.txt postgres-schema.txt
+```
+
+**Note:** Data types will differ between platforms (e.g., SQL Server's `nvarchar` vs PostgreSQL's `character varying`), but the consistent format allows you to easily identify structural differences.
 
 ## Development
 
 ### Prerequisites
 
 - .NET 10.0 SDK or later
-- SQL Server (for MSSQL support)
+- SQL Server (for SQL Server support)
+- PostgreSQL (for PostgreSQL support)
 
 ### Dependencies
 
 - **Microsoft.Data.SqlClient**: SQL Server connectivity
+- **Npgsql**: PostgreSQL connectivity
 - **Serilog**: Structured logging
 - **Microsoft.Extensions.***: Configuration and dependency injection
 
@@ -306,11 +342,11 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and planned features.
 
 ### Future Enhancements
 
-- PostgreSQL support
 - Schema comparison (diff) functionality
 - Support for additional database objects (indexes, foreign keys, stored procedures, functions, triggers, etc.)
 - GUI application using AvaloniaUI
 - Multiple output formats (JSON, YAML, SQL DDL)
+- Support for additional databases (MySQL, Oracle, etc.)
 
 ## Security
 

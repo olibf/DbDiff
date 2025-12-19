@@ -1,21 +1,22 @@
 using DbDiff.Application.DTOs;
 using DbDiff.Application.Formatters;
+
 using Microsoft.Extensions.Logging;
 
 namespace DbDiff.Application.Services;
 
 public class SchemaExportService
 {
-    private readonly ISchemaExtractor _schemaExtractor;
     private readonly ISchemaFormatter _schemaFormatter;
     private readonly ILogger<SchemaExportService> _logger;
+    private readonly Func<DatabaseType, ISchemaExtractor> _extractorFactory;
 
     public SchemaExportService(
-        ISchemaExtractor schemaExtractor,
+        Func<DatabaseType, ISchemaExtractor> extractorFactory,
         ISchemaFormatter schemaFormatter,
         ILogger<SchemaExportService> logger)
     {
-        _schemaExtractor = schemaExtractor ?? throw new ArgumentNullException(nameof(schemaExtractor));
+        _extractorFactory = extractorFactory ?? throw new ArgumentNullException(nameof(extractorFactory));
         _schemaFormatter = schemaFormatter ?? throw new ArgumentNullException(nameof(schemaFormatter));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -24,15 +25,17 @@ public class SchemaExportService
         SchemaExportRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (request == null)
-            throw new ArgumentNullException(nameof(request));
+        ArgumentNullException.ThrowIfNull(request);
 
         try
         {
-            _logger.LogInformation("Starting schema extraction from database");
+            _logger.LogInformation("Starting schema extraction from {DatabaseType} database", request.DatabaseType);
+
+            // Get the appropriate extractor for the database type
+            var schemaExtractor = _extractorFactory(request.DatabaseType);
 
             // Extract schema from database
-            var schema = await _schemaExtractor.ExtractSchemaAsync(
+            var schema = await schemaExtractor.ExtractSchemaAsync(
                 request.ConnectionString,
                 cancellationToken);
 

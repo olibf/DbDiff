@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **PostgreSQL database support** - Full schema extraction for PostgreSQL databases
+- `PostgreSqlSchemaExtractor` implementing `ISchemaExtractor` for PostgreSQL connectivity
+- `SchemaExtractorFactory` to dynamically instantiate the correct extractor based on database type
+- `DatabaseType` enum in Domain layer (`SqlServer`, `PostgreSql`)
+- `--database-type` (`-d`) CLI parameter to explicitly specify database type
+- Automatic database type detection from connection string patterns
+- Cross-database schema comparison capability (compare SQL Server and PostgreSQL schemas)
+- Npgsql package dependency for PostgreSQL connectivity
 - View extraction and export functionality for SQL Server
 - View SQL definitions included in exports (using sys.sql_modules for complete definitions)
 - View column structures with full metadata (data types, nullability, precision, etc.)
@@ -16,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--exclude-view-definitions` CLI flag to optionally exclude SQL definitions from output
 
 ### Changed
+- Updated `SchemaExportRequest` DTO to include `DatabaseType` property
+- Refactored `SchemaExportService` to use factory pattern for extractor instantiation
+- Updated CLI help text with PostgreSQL examples and database type parameter
 - Updated `DatabaseSchema` domain entity to include `Views` collection
 - Enhanced `CustomTextFormatter` to display view definitions and columns
 - Improved logging to report both table and view counts

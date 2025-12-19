@@ -1,8 +1,8 @@
-using Microsoft.Data.SqlClient;
+using Npgsql;
 
 namespace DbDiff.Infrastructure;
 
-public class MsSqlSchemaExtractor : ISchemaExtractor
+public class PostgreSqlSchemaExtractor : ISchemaExtractor
 {
     public async Task<DatabaseSchema> ExtractSchemaAsync(
         string connectionString,
@@ -11,7 +11,7 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
 
-        await using var connection = new SqlConnection(connectionString);
+        await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
         var databaseName = connection.Database;
@@ -24,21 +24,22 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
     }
 
     private static async Task<List<Table>> ExtractTablesAsync(
-        SqlConnection connection,
+        NpgsqlConnection connection,
         CancellationToken cancellationToken)
     {
         var tables = new List<Table>();
 
-        // Query to get all user tables
+        // Query to get all user tables (excluding system schemas)
         const string tableQuery = @"
             SELECT 
-                TABLE_SCHEMA,
-                TABLE_NAME
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_TYPE = 'BASE TABLE'
-            ORDER BY TABLE_SCHEMA, TABLE_NAME";
+                table_schema,
+                table_name
+            FROM information_schema.tables
+            WHERE table_type = 'BASE TABLE'
+                AND table_schema NOT IN ('pg_catalog', 'information_schema')
+            ORDER BY table_schema, table_name";
 
-        await using var tableCommand = new SqlCommand(tableQuery, connection);
+        await using var tableCommand = new NpgsqlCommand(tableQuery, connection);
         await using var tableReader = await tableCommand.ExecuteReaderAsync(cancellationToken);
 
         var tableInfoList = new List<(string Schema, string Name)>();
@@ -62,25 +63,22 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
     }
 
     private static async Task<List<View>> ExtractViewsAsync(
-        SqlConnection connection,
+        NpgsqlConnection connection,
         CancellationToken cancellationToken)
     {
         var views = new List<View>();
 
-        // Query to get all user views with their definitions (excluding system views)
-        // Using sys.views and sys.sql_modules to get the full definition (no 4000 char limit)
+        // Query to get all user views with their definitions (excluding system schemas)
         const string viewQuery = @"
             SELECT 
-                s.name AS SchemaName,
-                v.name AS ViewName,
-                m.definition AS Definition
-            FROM sys.views v
-            INNER JOIN sys.schemas s ON v.schema_id = s.schema_id
-            LEFT JOIN sys.sql_modules m ON v.object_id = m.object_id
-            WHERE s.name NOT IN ('sys', 'INFORMATION_SCHEMA')
-            ORDER BY s.name, v.name";
+                table_schema,
+                table_name,
+                view_definition
+            FROM information_schema.views
+            WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+            ORDER BY table_schema, table_name";
 
-        await using var viewCommand = new SqlCommand(viewQuery, connection);
+        await using var viewCommand = new NpgsqlCommand(viewQuery, connection);
         await using var viewReader = await viewCommand.ExecuteReaderAsync(cancellationToken);
 
         var viewInfoList = new List<(string Schema, string Name, string? Definition)>();
@@ -105,7 +103,7 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
     }
 
     private static async Task<List<Column>> ExtractColumnsAsync(
-        SqlConnection connection,
+        NpgsqlConnection connection,
         string schemaName,
         string tableName,
         CancellationToken cancellationToken)
@@ -114,19 +112,19 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
 
         const string columnQuery = @"
             SELECT 
-                c.COLUMN_NAME,
-                c.DATA_TYPE,
-                c.IS_NULLABLE,
-                c.CHARACTER_MAXIMUM_LENGTH,
-                c.NUMERIC_PRECISION,
-                c.NUMERIC_SCALE,
-                c.ORDINAL_POSITION
-            FROM INFORMATION_SCHEMA.COLUMNS c
-            WHERE c.TABLE_SCHEMA = @SchemaName 
-                AND c.TABLE_NAME = @TableName
-            ORDER BY c.ORDINAL_POSITION";
+                c.column_name,
+                c.data_type,
+                c.is_nullable,
+                c.character_maximum_length,
+                c.numeric_precision,
+                c.numeric_scale,
+                c.ordinal_position
+            FROM information_schema.columns c
+            WHERE c.table_schema = @SchemaName 
+                AND c.table_name = @TableName
+            ORDER BY c.ordinal_position";
 
-        await using var columnCommand = new SqlCommand(columnQuery, connection);
+        await using var columnCommand = new NpgsqlCommand(columnQuery, connection);
         columnCommand.Parameters.AddWithValue("@SchemaName", schemaName);
         columnCommand.Parameters.AddWithValue("@TableName", tableName);
 
@@ -140,7 +138,7 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
             var isNullable = isNullableStr.Equals("YES", StringComparison.OrdinalIgnoreCase);
 
             int? maxLength = columnReader.IsDBNull(3) ? null : columnReader.GetInt32(3);
-            int? precision = columnReader.IsDBNull(4) ? null : Convert.ToInt32(columnReader.GetByte(4));
+            int? precision = columnReader.IsDBNull(4) ? null : columnReader.GetInt32(4);
             int? scale = columnReader.IsDBNull(5) ? null : columnReader.GetInt32(5);
             var ordinalPosition = columnReader.GetInt32(6);
 
@@ -160,3 +158,4 @@ public class MsSqlSchemaExtractor : ISchemaExtractor
         return columns;
     }
 }
+
