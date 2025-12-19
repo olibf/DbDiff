@@ -106,6 +106,7 @@ dbdiff --connection "Server=localhost;Database=MyDb;Trusted_Connection=true;" --
 - `-o, --output <path>`: Output file path (default: schema.txt)
 - `--config <path>`: Path to configuration file (default: appsettings.json)
 - `--ignore-position`: Exclude column ordinal positions from output
+- `--exclude-view-definitions`: Exclude view SQL definitions from output (column structure still included)
 - `-h, --help`: Show help information
 
 ### Configuration

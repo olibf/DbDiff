@@ -13,12 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - View column structures with full metadata (data types, nullability, precision, etc.)
 - Alphabetically sorted views in output for deterministic comparison
 - Support for encrypted views (gracefully handles NULL definitions)
+- `--exclude-view-definitions` CLI flag to optionally exclude SQL definitions from output
 
 ### Changed
 - Updated `DatabaseSchema` domain entity to include `Views` collection
 - Enhanced `CustomTextFormatter` to display view definitions and columns
 - Improved logging to report both table and view counts
 - Updated `SchemaExportResult` DTO with separate `TableCount` and `ViewCount` properties
+- Made view definitions optional in export output via `IncludeViewDefinitions` formatter property
 
 ## [0.0.1] - 2025-12-16
 

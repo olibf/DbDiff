@@ -5,6 +5,7 @@ namespace DbDiff.Application.Formatters;
 public class CustomTextFormatter : ISchemaFormatter
 {
     public bool IncludeOrdinalPosition { get; set; } = true;
+    public bool IncludeViewDefinitions { get; set; } = true;
 
     public string Format(DatabaseSchema schema)
     {
@@ -41,8 +42,8 @@ public class CustomTextFormatter : ISchemaFormatter
         {
             sb.AppendLine($"VIEW: {view.FullName}");
             
-            // Include view definition if available
-            if (!string.IsNullOrWhiteSpace(view.Definition))
+            // Include view definition if available and enabled
+            if (IncludeViewDefinitions && !string.IsNullOrWhiteSpace(view.Definition))
             {
                 sb.AppendLine("  DEFINITION:");
                 // Indent each line of the definition
