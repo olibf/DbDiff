@@ -58,4 +58,20 @@ jobs:
           --self-contained true \
           -p:PublishSingleFile=true \
           -o ./verify-publish
+  
+  # Summary job that depends on all matrix jobs
+  # This provides a single status check for branch protection
+  pr-check-summary:
+    needs: multi-platform-test
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Check multi-platform-test results
+      run: |
+        if [ "${{ needs.multi-platform-test.result }}" != "success" ]; then
+          echo "One or more platform tests failed"
+          exit 1
+        fi
+        echo "All platform tests passed successfully"
 
