@@ -4,25 +4,28 @@ public class SchemaExportResult
 {
     public bool Success { get; init; }
     public string ExportedFilePath { get; init; }
-    public int ObjectCount { get; init; }
+    public int TableCount { get; init; }
+    public int ViewCount { get; init; }
+    public int ObjectCount => TableCount + ViewCount;
     public string? ErrorMessage { get; init; }
 
-    private SchemaExportResult(bool success, string exportedFilePath, int objectCount, string? errorMessage)
+    private SchemaExportResult(bool success, string exportedFilePath, int tableCount, int viewCount, string? errorMessage)
     {
         Success = success;
         ExportedFilePath = exportedFilePath;
-        ObjectCount = objectCount;
+        TableCount = tableCount;
+        ViewCount = viewCount;
         ErrorMessage = errorMessage;
     }
 
-    public static SchemaExportResult SuccessResult(string exportedFilePath, int objectCount)
+    public static SchemaExportResult SuccessResult(string exportedFilePath, int tableCount, int viewCount)
     {
-        return new SchemaExportResult(true, exportedFilePath, objectCount, null);
+        return new SchemaExportResult(true, exportedFilePath, tableCount, viewCount, null);
     }
 
     public static SchemaExportResult FailureResult(string errorMessage)
     {
-        return new SchemaExportResult(false, string.Empty, 0, errorMessage);
+        return new SchemaExportResult(false, string.Empty, 0, 0, errorMessage);
     }
 }
 

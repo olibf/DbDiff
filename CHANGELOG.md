@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- View extraction and export functionality for SQL Server
+- View SQL definitions included in exports (using sys.sql_modules for complete definitions)
+- View column structures with full metadata (data types, nullability, precision, etc.)
+- Alphabetically sorted views in output for deterministic comparison
+- Support for encrypted views (gracefully handles NULL definitions)
+
+### Changed
+- Updated `DatabaseSchema` domain entity to include `Views` collection
+- Enhanced `CustomTextFormatter` to display view definitions and columns
+- Improved logging to report both table and view counts
+- Updated `SchemaExportResult` DTO with separate `TableCount` and `ViewCount` properties
+
 ## [0.0.1] - 2025-12-16
 
 ### Added
