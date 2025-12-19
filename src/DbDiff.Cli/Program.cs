@@ -79,6 +79,7 @@ string? configFile = null;
 string? databaseTypeArg = null;
 bool showHelp = false;
 bool ignorePosition = false;
+bool excludeViewDefinitions = false;
 
 for (int i = 0; i < args.Length; i++)
 {
@@ -103,6 +104,9 @@ for (int i = 0; i < args.Length; i++)
         case "--ignore-position":
             ignorePosition = true;
             break;
+        case "--exclude-view-definitions":
+            excludeViewDefinitions = true;
+            break;
         case "--help" or "-h" or "-?":
             showHelp = true;
             break;
@@ -122,6 +126,7 @@ if (showHelp || args.Length == 0)
     Console.WriteLine("  -d, --database-type <type>   Database type: sqlserver, postgresql (auto-detected if not specified)");
     Console.WriteLine("  --config <path>              Configuration file path");
     Console.WriteLine("  --ignore-position            Exclude column ordinal positions from output");
+    Console.WriteLine("  --exclude-view-definitions   Exclude view SQL definitions from output");
     Console.WriteLine("  -h, --help                   Show help information");
     Console.WriteLine();
     Console.WriteLine("Configuration:");
@@ -217,6 +222,7 @@ try
     if (formatter is CustomTextFormatter customFormatter)
     {
         customFormatter.IncludeOrdinalPosition = !ignorePosition;
+        customFormatter.IncludeViewDefinitions = !excludeViewDefinitions;
     }
 
     var exportService = serviceProvider.GetRequiredService<SchemaExportService>();

@@ -16,11 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic database type detection from connection string patterns
 - Cross-database schema comparison capability (compare SQL Server and PostgreSQL schemas)
 - Npgsql package dependency for PostgreSQL connectivity
+- View extraction and export functionality for SQL Server
+- View SQL definitions included in exports (using sys.sql_modules for complete definitions)
+- View column structures with full metadata (data types, nullability, precision, etc.)
+- Alphabetically sorted views in output for deterministic comparison
+- Support for encrypted views (gracefully handles NULL definitions)
+- `--exclude-view-definitions` CLI flag to optionally exclude SQL definitions from output
 
 ### Changed
 - Updated `SchemaExportRequest` DTO to include `DatabaseType` property
 - Refactored `SchemaExportService` to use factory pattern for extractor instantiation
 - Updated CLI help text with PostgreSQL examples and database type parameter
+- Updated `DatabaseSchema` domain entity to include `Views` collection
+- Enhanced `CustomTextFormatter` to display view definitions and columns
+- Improved logging to report both table and view counts
+- Updated `SchemaExportResult` DTO with separate `TableCount` and `ViewCount` properties
+- Made view definitions optional in export output via `IncludeViewDefinitions` formatter property
 
 ## [0.0.1] - 2025-12-16
 

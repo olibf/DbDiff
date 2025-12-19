@@ -18,8 +18,9 @@ public class PostgreSqlSchemaExtractor : ISchemaExtractor
         var extractedAt = DateTime.UtcNow;
 
         var tables = await ExtractTablesAsync(connection, cancellationToken);
+        var views = await ExtractViewsAsync(connection, cancellationToken);
 
-        return new DatabaseSchema(databaseName, extractedAt, tables);
+        return new DatabaseSchema(databaseName, extractedAt, tables, views);
     }
 
     private static async Task<List<Table>> ExtractTablesAsync(
@@ -59,6 +60,46 @@ public class PostgreSqlSchemaExtractor : ISchemaExtractor
         }
 
         return tables;
+    }
+
+    private static async Task<List<View>> ExtractViewsAsync(
+        NpgsqlConnection connection,
+        CancellationToken cancellationToken)
+    {
+        var views = new List<View>();
+
+        // Query to get all user views with their definitions (excluding system schemas)
+        const string viewQuery = @"
+            SELECT 
+                table_schema,
+                table_name,
+                view_definition
+            FROM information_schema.views
+            WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+            ORDER BY table_schema, table_name";
+
+        await using var viewCommand = new NpgsqlCommand(viewQuery, connection);
+        await using var viewReader = await viewCommand.ExecuteReaderAsync(cancellationToken);
+
+        var viewInfoList = new List<(string Schema, string Name, string? Definition)>();
+        while (await viewReader.ReadAsync(cancellationToken))
+        {
+            var schemaName = viewReader.GetString(0);
+            var viewName = viewReader.GetString(1);
+            var definition = viewReader.IsDBNull(2) ? null : viewReader.GetString(2);
+            viewInfoList.Add((schemaName, viewName, definition));
+        }
+
+        await viewReader.CloseAsync();
+
+        // Extract columns for each view
+        foreach (var (schemaName, viewName, definition) in viewInfoList)
+        {
+            var columns = await ExtractColumnsAsync(connection, schemaName, viewName, cancellationToken);
+            views.Add(new View(schemaName, viewName, columns, definition));
+        }
+
+        return views;
     }
 
     private static async Task<List<Column>> ExtractColumnsAsync(

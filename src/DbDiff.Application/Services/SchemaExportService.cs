@@ -39,9 +39,10 @@ public class SchemaExportService
                 request.ConnectionString,
                 cancellationToken);
 
-            _logger.LogInformation("Successfully extracted schema from database {DatabaseName} with {TableCount} tables",
+            _logger.LogInformation("Successfully extracted schema from database {DatabaseName} with {TableCount} tables and {ViewCount} views",
                 schema.DatabaseName,
-                schema.Tables.Count);
+                schema.Tables.Count,
+                schema.Views.Count);
 
             // Format schema to text
             var formattedSchema = _schemaFormatter.Format(schema);
@@ -59,7 +60,7 @@ public class SchemaExportService
 
             _logger.LogInformation("Schema exported successfully to {OutputPath}", request.OutputPath);
 
-            return SchemaExportResult.SuccessResult(request.OutputPath, schema.Tables.Count);
+            return SchemaExportResult.SuccessResult(request.OutputPath, schema.Tables.Count, schema.Views.Count);
         }
         catch (Exception ex)
         {

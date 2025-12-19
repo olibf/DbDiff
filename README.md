@@ -13,6 +13,9 @@ Current version: **0.0.1**
 ## Features
 
 - Export database schemas to text format from SQL Server and PostgreSQL
+- **Complete schema export including:**
+  - Tables with full column definitions
+  - Views with SQL definitions and column structures
 - Deterministic, diff-friendly output format
 - Alphabetically sorted tables and columns for easy comparison
 - Cross-database schema comparison (compare SQL Server vs PostgreSQL schemas)
@@ -112,6 +115,7 @@ dbdiff --connection "Host=localhost;Database=mydb;Username=user;Password=pass" -
 - `-d, --database-type <type>`: Database type: `sqlserver`, `postgresql` (auto-detected if not specified)
 - `--config <path>`: Path to configuration file (default: appsettings.json)
 - `--ignore-position`: Exclude column ordinal positions from output
+- `--exclude-view-definitions`: Exclude view SQL definitions from output (column structure still included)
 - `-h, --help`: Show help information
 
 ### Database Type Detection
@@ -174,12 +178,31 @@ TABLE: dbo.Users
     Nullable: Yes
     MaxLength: 100
 
-TABLE: dbo.Orders
-  ...
+VIEW: dbo.ActiveUsers
+  DEFINITION:
+    CREATE VIEW dbo.ActiveUsers AS
+    SELECT Id, Name, Email
+    FROM dbo.Users
+    WHERE IsActive = 1
+  COLUMN: Email
+    OrdinalPosition: 3
+    Type: nvarchar
+    Nullable: Yes
+    MaxLength: 255
+  COLUMN: Id
+    OrdinalPosition: 1
+    Type: int
+    Nullable: No
+  COLUMN: Name
+    OrdinalPosition: 2
+    Type: nvarchar
+    Nullable: Yes
+    MaxLength: 100
 ```
 
 Features:
-- Tables and columns are alphabetically sorted
+- Tables, views, and columns are alphabetically sorted
+- Views include complete SQL definitions for comparison
 - Consistent formatting and indentation
 - One property per line
 - Deterministic output for reliable diffing
@@ -320,7 +343,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and planned features.
 ### Future Enhancements
 
 - Schema comparison (diff) functionality
-- Support for additional database objects (indexes, foreign keys, views, stored procedures, etc.)
+- Support for additional database objects (indexes, foreign keys, stored procedures, functions, triggers, etc.)
 - GUI application using AvaloniaUI
 - Multiple output formats (JSON, YAML, SQL DDL)
 - Support for additional databases (MySQL, Oracle, etc.)
