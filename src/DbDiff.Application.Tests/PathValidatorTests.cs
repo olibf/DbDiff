@@ -80,7 +80,7 @@ public class PathValidatorTests
         var outputPath = Path.Combine(Path.GetTempPath(), "outside", "output.txt");
 
         // Act & Assert
-        Assert.Throws<UnauthorizedAccessException>(() => 
+        Assert.Throws<UnauthorizedAccessException>(() =>
             PathValidator.ValidateOutputPath(outputPath, basePath));
     }
 
@@ -104,7 +104,7 @@ public class PathValidatorTests
         }
 
         // Act & Assert
-        Assert.Throws<UnauthorizedAccessException>(() => 
+        Assert.Throws<UnauthorizedAccessException>(() =>
             PathValidator.ValidateOutputPath(systemPath));
     }
 
@@ -112,7 +112,7 @@ public class PathValidatorTests
     public void ValidateOutputPath_WithInvalidCharacters_ThrowsArgumentException()
     {
         // Arrange
-        var invalidPath = OperatingSystem.IsWindows() 
+        var invalidPath = OperatingSystem.IsWindows()
             ? "output/file<>*.txt"  // <, >, * are invalid on Windows
             : "output/file\0.txt";   // null character is invalid on Unix
 
@@ -160,7 +160,7 @@ public class PathValidatorTests
         var nonExistentPath = Path.Combine(Path.GetTempPath(), "nonexistent-config.json");
 
         // Act & Assert
-        Assert.Throws<FileNotFoundException>(() => 
+        Assert.Throws<FileNotFoundException>(() =>
             PathValidator.ValidateConfigPath(nonExistentPath));
     }
 
@@ -174,7 +174,7 @@ public class PathValidatorTests
         try
         {
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => 
+            Assert.Throws<ArgumentException>(() =>
                 PathValidator.ValidateConfigPath(tempTextFile));
         }
         finally
@@ -196,7 +196,7 @@ public class PathValidatorTests
         try
         {
             // Act & Assert
-            Assert.Throws<UnauthorizedAccessException>(() => 
+            Assert.Throws<UnauthorizedAccessException>(() =>
                 PathValidator.ValidateConfigPath(configFile, basePath));
         }
         finally
@@ -251,7 +251,7 @@ public class PathValidatorTests
         }
 
         // Act & Assert
-        Assert.Throws<UnauthorizedAccessException>(() => 
+        Assert.Throws<UnauthorizedAccessException>(() =>
             PathValidator.ValidateLogPath(systemLogPath));
     }
 

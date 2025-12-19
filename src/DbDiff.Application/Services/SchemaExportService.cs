@@ -11,7 +11,7 @@ public class SchemaExportService
     private readonly ILogger<SchemaExportService> _logger;
 
     public SchemaExportService(
-        ISchemaExtractor schemaExtractor, 
+        ISchemaExtractor schemaExtractor,
         ISchemaFormatter schemaFormatter,
         ILogger<SchemaExportService> logger)
     {
@@ -21,7 +21,7 @@ public class SchemaExportService
     }
 
     public async Task<SchemaExportResult> ExportSchemaAsync(
-        SchemaExportRequest request, 
+        SchemaExportRequest request,
         CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -33,11 +33,11 @@ public class SchemaExportService
 
             // Extract schema from database
             var schema = await _schemaExtractor.ExtractSchemaAsync(
-                request.ConnectionString, 
+                request.ConnectionString,
                 cancellationToken);
 
-            _logger.LogInformation("Successfully extracted schema from database {DatabaseName} with {TableCount} tables and {ViewCount} views", 
-                schema.DatabaseName, 
+            _logger.LogInformation("Successfully extracted schema from database {DatabaseName} with {TableCount} tables and {ViewCount} views",
+                schema.DatabaseName,
                 schema.Tables.Count,
                 schema.Views.Count);
 

@@ -11,7 +11,7 @@ public class View
     {
         if (string.IsNullOrWhiteSpace(schemaName))
             throw new ArgumentException("Schema name cannot be null or empty.", nameof(schemaName));
-        
+
         if (string.IsNullOrWhiteSpace(viewName))
             throw new ArgumentException("View name cannot be null or empty.", nameof(viewName));
 

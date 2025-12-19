@@ -178,8 +178,8 @@ public static class PathValidator
         var normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var normalizedDirectory = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-        return normalizedPath.StartsWith(normalizedDirectory + Path.DirectorySeparatorChar, 
-            GetPathComparison()) || 
+        return normalizedPath.StartsWith(normalizedDirectory + Path.DirectorySeparatorChar,
+            GetPathComparison()) ||
             normalizedPath.Equals(normalizedDirectory, GetPathComparison());
     }
 
@@ -198,7 +198,7 @@ public static class PathValidator
 
             // Check system drive root
             var systemDrive = Path.GetPathRoot(Environment.SystemDirectory);
-            if (!string.IsNullOrEmpty(systemDrive) && 
+            if (!string.IsNullOrEmpty(systemDrive) &&
                 normalizedPath.Equals(systemDrive.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
                 return true;
         }

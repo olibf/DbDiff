@@ -41,7 +41,7 @@ public class CustomTextFormatter : ISchemaFormatter
         foreach (var view in sortedViews)
         {
             sb.AppendLine($"VIEW: {view.FullName}");
-            
+
             // Include view definition if available and enabled
             if (IncludeViewDefinitions && !string.IsNullOrWhiteSpace(view.Definition))
             {
@@ -53,7 +53,7 @@ public class CustomTextFormatter : ISchemaFormatter
                     sb.AppendLine($"    {line}");
                 }
             }
-            
+
             FormatColumns(sb, view.Columns);
             sb.AppendLine();
         }
@@ -71,10 +71,10 @@ public class CustomTextFormatter : ISchemaFormatter
         foreach (var column in sortedColumns)
         {
             sb.AppendLine($"  COLUMN: {column.Name}");
-            
+
             if (IncludeOrdinalPosition)
                 sb.AppendLine($"    OrdinalPosition: {column.OrdinalPosition}");
-            
+
             sb.AppendLine($"    Type: {column.DataType}");
             sb.AppendLine($"    Nullable: {(column.IsNullable ? "Yes" : "No")}");
 
