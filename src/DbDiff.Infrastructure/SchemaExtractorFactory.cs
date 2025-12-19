@@ -2,7 +2,7 @@ namespace DbDiff.Infrastructure;
 
 public class SchemaExtractorFactory
 {
-    public ISchemaExtractor CreateExtractor(DatabaseType databaseType)
+    public static ISchemaExtractor CreateExtractor(DatabaseType databaseType)
     {
         return databaseType switch
         {

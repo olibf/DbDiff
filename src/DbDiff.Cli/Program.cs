@@ -65,7 +65,7 @@ services.AddSingleton<ISchemaFormatter, CustomTextFormatter>();
 services.AddSingleton<Func<DatabaseType, ISchemaExtractor>>(serviceProvider =>
 {
     var factory = new SchemaExtractorFactory();
-    return (databaseType) => factory.CreateExtractor(databaseType);
+    return (databaseType) => SchemaExtractorFactory.CreateExtractor(databaseType);
 });
 
 services.AddSingleton<SchemaExportService>();
