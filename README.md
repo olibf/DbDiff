@@ -1,6 +1,14 @@
 # DbDiff - Database Schema Comparison Tool
 
-A CLI tool for exporting and comparing database schemas, built with .NET following hexagonal architecture principles.
+DbDiff will be a set of tools for comparing database schemas. While it's still in early development, I use it daily to
+compare schemas across different application databases and instances. The tool exports schemas to a simple,
+alphabetically-sorted text format that contains just enough information to be readable and easy to compare using diff
+tools like [WinMerge](https://winmerge.org/) or [Meld](https://gnome.pages.gitlab.gnome.org/meld/). For most of my
+needs, this is sufficient to verify that a database is in the correct state (yes, sometimes manual checks are
+necessary).
+
+Future plans include adding a more comfortable user interface, likely built with AvaloniaUI. For now, I'm satisfied
+with the terminal-based tools.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/olibf/dbdiff/actions/workflows/ci.yml/badge.svg)](https://github.com/olibf/dbdiff/actions/workflows/ci.yml)
@@ -8,17 +16,18 @@ A CLI tool for exporting and comparing database schemas, built with .NET followi
 
 ## Version
 
-Current version: **0.0.1**
+Current version: **0.1.0**
 
 ## Features
 
-- Export database schemas to text format from SQL Server and PostgreSQL
+- Export database schemas to text format from SQL Server, PostgreSQL and SQLite
 - **Complete schema export including:**
   - Tables with full column definitions
   - Views with SQL definitions and column structures
 - Deterministic, diff-friendly output format
 - Alphabetically sorted tables and columns for easy comparison
 - Cross-database schema comparison (compare SQL Server vs PostgreSQL schemas)
+- Cross-database schema comparison with SQLite limited due to the limitations of SQLite
 - Automatic database type detection from connection strings
 - Configurable via CLI arguments, environment variables, or configuration files
 - Structured logging with Serilog
@@ -32,7 +41,15 @@ Current version: **0.0.1**
 
 ### Quick Install (Windows)
 
-Use the provided PowerShell installation script:
+### Option 1: Download Pre-built Release
+
+1. Download the latest release for your platform from the [Releases page](https://github.com/olibf/dbdiff/releases)
+2. Extract the archive to a folder of your choice (e.g., `C:\Tools\DbDiff` on Windows or `/usr/local/bin/dbdiff` on Linux)
+3. Add the folder to your system PATH environment variable to run `dbdiff` from anywhere
+
+### Option 2: Build from Source
+
+If you're building the tool yourself, use the provided installation script:
 
 ```powershell
 .\install.ps1 -Destination "C:\Tools\DbDiff"
@@ -237,6 +254,7 @@ The project follows **Hexagonal Architecture** (Ports & Adapters) with clear sep
 
 - ✅ Microsoft SQL Server (MSSQL)
 - ✅ PostgreSQL
+- ✅ SQLite
 
 ### Cross-Database Schema Comparison
 
@@ -249,8 +267,12 @@ dbdiff --connection "Server=localhost;Database=MyDb;Trusted_Connection=true;" --
 # Export PostgreSQL schema
 dbdiff --connection "Host=localhost;Database=mydb;Username=user;Password=pass" --output postgres-schema.txt
 
+# Exort SQLite schema
+DbDiff.Cli --connection "Data Source=path-to-file/database.db" --database-type sqlite --output sqlite-schema.txt
+
 # Compare using your favorite diff tool
 diff sqlserver-schema.txt postgres-schema.txt
+diff sqlserver-schema.txt sqlite-schema.txt
 ```
 
 **Note:** Data types will differ between platforms (e.g., SQL Server's `nvarchar` vs PostgreSQL's `character varying`), but the consistent format allows you to easily identify structural differences.
@@ -262,10 +284,12 @@ diff sqlserver-schema.txt postgres-schema.txt
 - .NET 10.0 SDK or later
 - SQL Server (for SQL Server support)
 - PostgreSQL (for PostgreSQL support)
+- SQLite datbase file
 
 ### Dependencies
 
 - **Microsoft.Data.SqlClient**: SQL Server connectivity
+- **Microsoft.Data.SqLite**: SQLite connectivity
 - **Npgsql**: PostgreSQL connectivity
 - **Serilog**: Structured logging
 - **Microsoft.Extensions.***: Configuration and dependency injection
