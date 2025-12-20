@@ -3,6 +3,7 @@ namespace DbDiff.Domain;
 public enum DatabaseType
 {
     SqlServer,
-    PostgreSql
+    PostgreSql,
+    Sqlite
 }
 

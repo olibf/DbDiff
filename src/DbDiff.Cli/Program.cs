@@ -123,7 +123,7 @@ if (showHelp || args.Length == 0)
     Console.WriteLine("Options:");
     Console.WriteLine("  -c, --connection <string>    Database connection string (required)");
     Console.WriteLine("  -o, --output <path>          Output file path (default: schema.txt)");
-    Console.WriteLine("  -d, --database-type <type>   Database type: sqlserver, postgresql (auto-detected if not specified)");
+    Console.WriteLine("  -d, --database-type <type>   Database type: sqlserver, postgresql, sqlite (auto-detected if not specified)");
     Console.WriteLine("  --config <path>              Configuration file path");
     Console.WriteLine("  --ignore-position            Exclude column ordinal positions from output");
     Console.WriteLine("  --exclude-view-definitions   Exclude view SQL definitions from output");
@@ -201,7 +201,7 @@ try
         if (!Enum.TryParse<DatabaseType>(databaseTypeArg, ignoreCase: true, out databaseType))
         {
             Console.Error.WriteLine($"Error: Invalid database type '{databaseTypeArg}'.");
-            Console.Error.WriteLine("Valid values: sqlserver, postgresql");
+            Console.Error.WriteLine("Valid values: sqlserver, postgresql, sqlite");
             return 1;
         }
     }
@@ -267,6 +267,14 @@ finally
 
 static DatabaseType DetectDatabaseType(string connectionString)
 {
+    // Check for Sqlite keywords
+    if (connectionString.Contains("Mode=") ||
+        connectionString.Contains("Cache=") ||
+        connectionString.Contains("Filename="))
+    {
+        return DatabaseType.Sqlite;
+    }
+
     // Check for PostgreSQL keywords
     if (connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) ||
         connectionString.Contains("Username=", StringComparison.OrdinalIgnoreCase))

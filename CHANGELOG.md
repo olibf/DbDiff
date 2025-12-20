@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **SqLite database support** - Schema extration within the limits of SqLite
+- `SqliteSqlSchemaExtractor` implements the `ISchemaExtractor` for SqLite
+- Extended enum in Domain layer (`SqlServer`, `PostgreSql`, `Sqlite`)
+- `--database-type` (`-d`) accepts now `sqlite`
+
 ## [0.1.0] - 2025-12-19
 
 ### Added
